@@ -1,0 +1,12 @@
+{
+    "locale": "de-DE",
+    "messages": {
+        "externalapplications": {
+            "filter": "External Applications",
+            "register": "External Applications"
+        },
+        "gnhome": {
+            "viewExternalApplication": "Open external application ..."
+        }
+    }
+}

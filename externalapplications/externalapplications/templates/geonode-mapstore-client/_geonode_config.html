@@ -1,0 +1,41 @@
+{% extends 'geonode-mapstore-client/_geonode_config.html' %}
+{% block override_local_config %}
+<script>
+    (function() {
+        const { overrideLocalConfig } = window.__GEONODE_CONFIG__;
+
+        window.__GEONODE_CONFIG__.overrideLocalConfig = function(localConfig, _) {
+            if (overrideLocalConfig) {
+                overrideLocalConfig(localConfig, _)
+            }
+
+            const { filtersForm, cardsMenu } = localConfig.geoNodeConfiguration;
+        
+            filtersForm.items[0].items.push({
+                id: "externalapplication",
+                labelId: "externalapplications.filter",
+                type: "filter",
+                query: {
+                    "filter{resource_type.in}": "externalapplication"
+                }
+            });
+
+            cardsMenu.items[0].items.push({
+                labelId: "externalapplications.register",
+                value: "externalapplication",
+                type: "link",
+                href: "/external-applications/create",
+                authenticated: true,
+                perms: [
+                    {
+                        "type": "user",
+                        "value": "add_resource"
+                    }
+                ]
+            });
+
+            return localConfig;
+        };
+    })();
+</script>
+{% endblock %}
