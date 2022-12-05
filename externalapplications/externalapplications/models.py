@@ -1,8 +1,10 @@
 from django.db import models
 from django.conf import settings
 from django.urls import reverse
+from django.contrib import admin
 from django.utils.functional import classproperty
 from django.utils.translation import ugettext_lazy as _
+
 from geonode.geoapps.models import GeoApp
 from geonode.groups.conf import settings as groups_settings
 from geonode.security.permissions import (
@@ -44,3 +46,6 @@ class ExternalApplication(GeoApp):
 
     def get_absolute_url(self):
         return self.url
+
+
+admin.site.register(ExternalApplication)
