@@ -30,7 +30,7 @@ def run_setup_hooks(*args, **kwargs):
             MenuItem.objects.create(title=title, menu=menu, order=1, blank_target=False,
                                     url="/catalogue/#/search/?f=externalapplication")
 
-    urlpatterns += [url(r'^external-applications/', include('externalapplications.urls'))]
+    urlpatterns += [url(r'^externalapplications/', include('externalapplications.urls'))]
 
 
 class ExternalapplicationsConfig(AppConfig):

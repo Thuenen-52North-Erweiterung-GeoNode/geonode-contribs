@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.urls import reverse
 from django.utils.functional import classproperty
 from django.utils.translation import ugettext_lazy as _
 from geonode.geoapps.models import GeoApp
@@ -8,6 +9,7 @@ from geonode.security.permissions import (
     VIEW_PERMISSIONS,
     OWNER_PERMISSIONS,
 )
+from geonode.utils import build_absolute_uri
 
 # Create your models here.
 class ExternalApplication(GeoApp):
@@ -35,14 +37,10 @@ class ExternalApplication(GeoApp):
 
     @property
     def embed_url(self):
-        return ""
-
-    # def get_thumbnail_url(self):
-    #     return "https://52north.org/wp-content/uploads/2016/06/logo-main.png"
+        return None
 
     def get_detail_url(self):
-        site_url = settings.SITEURL.rstrip('/') if settings.SITEURL.startswith('http') else settings.SITEURL
-        return f"{site_url}/external-applications/{self.pk}"
+        return build_absolute_uri(reverse("external_application_metadata", args=(self.pk,)))
 
     def get_absolute_url(self):
         return self.url
