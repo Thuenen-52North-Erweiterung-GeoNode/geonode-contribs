@@ -60,9 +60,20 @@ class ExternalApplicationCreateForm(forms.Form):
                 'class': 'inputText',
                 'required': '',
                 'type': 'url',
-
             }
         )
+    )
+    thumbnail = forms.FileField(
+        label=_("Upload Thumbnail"),
+        widget=forms.FileInput(
+            attrs={
+                'size': '65',
+                'class': 'inputText',
+                'required': 'false',
+                'type': 'file',
+            }
+        )
+
     )
         
 
@@ -102,6 +113,18 @@ class ExternalApplicationForm(forms.ModelForm):
             }
         )
     )
+    thumbnail = forms.FileField(
+        label=_("Upload Thumbnail"),
+        widget=forms.FileInput(
+            attrs={
+                'size': '65',
+                'class': 'inputText',
+                'required': '',
+                'type': 'file',
+            }
+        )
+
+    )
     keywords = taggit.forms.TagField(required=False)
 
     class Meta:
@@ -110,5 +133,6 @@ class ExternalApplicationForm(forms.ModelForm):
             'title',
             'abstract',
             'url',
+            'thumbnail',
             'keywords',
         )

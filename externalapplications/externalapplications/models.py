@@ -11,6 +11,9 @@ class ExternalApplication(GeoApp):
     def embed_url(self):
         return ""
 
+    # def get_thumbnail_url(self):
+    #     return "https://52north.org/wp-content/uploads/2016/06/logo-main.png"
+
     def get_detail_url(self):
         site_url = settings.SITEURL.rstrip('/') if settings.SITEURL.startswith('http') else settings.SITEURL
         return f"{site_url}/external-applications/{self.pk}"

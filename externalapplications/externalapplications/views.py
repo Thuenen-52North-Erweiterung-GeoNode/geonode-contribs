@@ -1,9 +1,13 @@
 import os
 import json
+import uuid
 import shutil
 import logging
 import warnings
 import traceback
+from io import BytesIO
+from PIL import Image
+
 from django.urls import reverse
 from django.conf import settings
 from django.contrib import messages
@@ -27,6 +31,7 @@ from geonode.groups.models import GroupProfile
 from geonode.monitoring.models import EventType
 from geonode.storage.manager import storage_manager
 from geonode.resource.manager import resource_manager
+from geonode.thumbs.thumbnails import _generate_thumbnail_name
 from geonode.decorators import check_keyword_write_perms
 from geonode.security.utils import (
     get_user_visible_groups,
@@ -54,16 +59,23 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def create_external_application(request):
-    template = "externalapplications/create_external_application.html"
+    template = "externalapplications/external_application_create.html"
     
     if request.method == "POST":
         
-        form = ExternalApplicationCreateForm(request.POST)
+        form = ExternalApplicationCreateForm(request.POST, request.FILES)
         if form.is_valid():
             data = form.cleaned_data
             obj = ExternalApplication.objects.create(owner=request.user,
                 url=data.get("url"), title=data.get("title"), abstract=data.get("abstract"),
-                resource_type = 'externalapplication')
+                uuid=str(uuid.uuid4()), resource_type = 'externalapplication')
+            if form.files and form.files["thumbnail"]:
+                thumbnail = form.files["thumbnail"]
+                with BytesIO() as output:
+                    img = Image.open(thumbnail)
+                    img.save(output, format="PNG")
+                    content = output.getvalue()
+                obj.save_thumbnail(thumbnail.name, content)
         return HttpResponseRedirect(reverse('external_application_metadata_detail', args=(obj.pk,)))
     else:
         form = ExternalApplicationCreateForm()
