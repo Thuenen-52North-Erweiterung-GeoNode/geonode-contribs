@@ -66,6 +66,10 @@ def create_external_application(request):
             obj = ExternalApplication.objects.create(owner=request.user,
                 url=data.get("url"), title=data.get("title"), abstract=data.get("abstract"),
                 uuid=str(uuid.uuid4()), resource_type = 'externalapplication')
+                
+            obj.set_missing_info()
+            resource_manager.set_permissions(None, instance=obj, permissions=None, created=True)
+            
             if form.files and form.files["thumbnail"]:
                 thumbnail = form.files["thumbnail"]
                 with BytesIO() as output:
