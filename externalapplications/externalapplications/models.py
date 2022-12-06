@@ -42,7 +42,7 @@ class ExternalApplication(GeoApp):
         return None
 
     def get_detail_url(self):
-        return build_absolute_uri(reverse("external_application_metadata", args=(self.pk,)))
+        return build_absolute_uri(f"/externalapplications/{self.pk}")
 
     def get_absolute_url(self):
         return self.url
