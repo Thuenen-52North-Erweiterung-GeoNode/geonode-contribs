@@ -3,7 +3,7 @@
     "messages": {
         "externalapplications": {
             "filter": "External Applications",
-            "register": "External Applications"
+            "register": "External Application"
         },
         "gnhome": {
             "viewExternalApplication": "Open external application ..."
