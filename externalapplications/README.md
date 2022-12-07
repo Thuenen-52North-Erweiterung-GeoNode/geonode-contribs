@@ -34,3 +34,13 @@ In case you want to manually add such entry use the GeoNode admin.
 First create a `Menu` _External Application_ which you put under placeholder `TOPBAR_MENU_LEFT`. 
 After that, create a `MenuItem` to create a `MenuItem` _External Application_ and select the `Menu` you created.
 To filter all external applications add the URL `/catalogue/#/search/?f=externalapplication`.
+
+## Working with External Applications
+
+Create an external application by clicking on "External Resource" in the "Add Resource"-Dropdown.
+Optionally, you can upload a thumbnail.
+Enable the "External Applications" checkbox under "Filter" to display all external applications only.
+To jump to the external application, either click on "View" on the resource card or by clicking on "Open external application ..." on the details panel.
+
+Editing an external application can be done only via the admin interface where all attributes can be changed. 
+To update the thumbnail you have to upload the new thumbnail by hand and change the thumbnail URL.
