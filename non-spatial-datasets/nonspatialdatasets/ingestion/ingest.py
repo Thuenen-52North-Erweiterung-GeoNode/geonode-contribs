@@ -33,12 +33,13 @@ def ingest_zipped_dataset(zip_file):
                 
                 dataset_id, dataset_table = ingest_csv_file(dataset_title, csv_file, columns, dialect)
                 return NonSpatialDatasetParameters(dataset_id, dataset_title, dataset_name, dataset_abstract, columns, dataset_table)
+            except Exception as e:
+                raise e
             finally:
                 # cleanup after ingestion
                 shutil.rmtree(extract_path, ignore_errors=True)
-                
-        # cleanup after ingestion
-        os.remove(zip_file)
+                # cleanup after ingestion
+                os.remove(zip_file)
         
     else:
         raise Exception("Unsupported file type")
