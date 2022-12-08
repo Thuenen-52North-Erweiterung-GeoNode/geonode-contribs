@@ -1,0 +1,9 @@
+POST http://localhost:8000/nonspatial/
+Content-Type: multipart/form-data; boundary=WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="data.zip"
+Content-Type: application/zip
+
+< ./data.zip
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
