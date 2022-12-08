@@ -1,0 +1,20 @@
+msgid "Create External Application"
+msgstr "Externe Anwendung erstellen"
+
+msgid "Title"
+msgstr "Titel"
+
+msgid "Abstract"
+msgstr "Beschreibung"
+
+msgid "External Application URL"
+msgstr "URL zur externen Anwendung"
+
+msgid "External Application"
+msgstr "Externe Anwendung"
+
+msgid "External Applications"
+msgstr "Externe Anwendungen"
+
+msgid "Preview Image"
+msgstr "Vorschaubild"

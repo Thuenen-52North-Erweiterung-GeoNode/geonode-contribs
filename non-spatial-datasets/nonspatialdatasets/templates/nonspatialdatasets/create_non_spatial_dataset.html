@@ -1,0 +1,17 @@
+{% extends "nonspatialdatasets/nonspatialdatasets_base.html" %}
+
+{% load i18n %}
+{% load bootstrap_tags %}
+
+{% block body %}
+  <form action="" class="form-horizontal" method="post">
+    <legend>{% trans "Create Non-Spatial Dataset" %}</legend>
+    {% csrf_token %}
+    <div class="form-controls">
+      {{ form|as_bootstrap }}
+    </div>
+    <div class="form-actions">
+      <input type="submit" value="{% trans "Create Non-Spatial Dataset" %}" class="btn btn-primary"/>
+    </div>
+  </form>
+{% endblock %}
