@@ -17,6 +17,7 @@
 #
 #########################################################################
 from geonode.api.urls import router
+
 from django.conf.urls import url, include
 
 from geonode.urls import urlpatterns as geonode_urlpatterns
@@ -29,10 +30,5 @@ geonode_urlpatterns += [
     url(r'^api/v2/', include(router.urls))
 ]
 
-urlpatterns = [ 
-    #url(r'^api/v2/', include(router.urls)),
-
-    # path('<int:dataset_id>/data', views.get_dataset_data, name='get_dataset_data'),
-    # path('<int:dataset_id>/export', views.export_dataset_data, name='export_dataset_data')
-]
+urlpatterns = []
 
