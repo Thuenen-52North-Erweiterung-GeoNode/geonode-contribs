@@ -1,21 +1,17 @@
 import os
-from django.shortcuts import render
-from django.views import View
-from django.http import HttpResponse, JsonResponse
-from django.views.decorators.http import require_http_methods
-from django.views.decorators.csrf import csrf_exempt
-from django.views.generic.edit import CreateView
-from django.core.files.storage import FileSystemStorage
-from django.contrib.auth import get_user_model
-from django.core.exceptions import ObjectDoesNotExist
 import uuid
 import json
 
-from . import urls
-from .database.database import query_dataset, get_column_definitions
-from .database.db_models import NonSpatialDatasetParameters
-from .ingestion.ingest import ingest_zipped_dataset, register_dataset
+from django.http import HttpResponse, JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
+from django.core.files.storage import FileSystemStorage
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ObjectDoesNotExist
+
 from .models import NonSpatialDataset
+from .database.database import query_dataset, get_column_definitions
+from .ingestion.ingest import ingest_zipped_dataset, register_dataset
 from .coding.csv_encoder import encode_as_csv
 
 @require_http_methods(["GET", "POST"])

@@ -1,13 +1,16 @@
-from django.conf import settings
-from django.core.files.storage import FileSystemStorage
-import mimetypes
-import zipfile
-import uuid
+
+
 import os
-import shutil
 import json
 import csv
+import uuid
+import mimetypes
+import zipfile
+import shutil
 from urllib.parse import urlencode, urlparse, urlunparse, parse_qs
+
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 
 from ..database.database import create_dataset_table, insert_data_rows, insert_catalog_entry, query_dataset
 from ..database.db_models import NonSpatialDatasetParameters
@@ -69,7 +72,7 @@ def validate_connection_url_and_extract_table(path_url):
     
 def register_dataset(tabular_data_resource):
     if "path" not in tabular_data_resource or len(tabular_data_resource["path"]) < len("postgres://___"):
-        raise Exception("No or invalid 'path' attribute defined in the Tabular Data Resource definition.")
+        raise Exception("Invalid 'path' attribute defined in the Tabular Data Resource definition.")
 
     path_url = urlparse(tabular_data_resource["path"])
     target_table = validate_connection_url_and_extract_table(path_url)

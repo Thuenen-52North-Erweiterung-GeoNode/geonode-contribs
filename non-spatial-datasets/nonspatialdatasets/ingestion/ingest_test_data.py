@@ -3,7 +3,7 @@ import logging
 import json
 import csv
 
-from ..database.database import create_catalog_table, create_dataset_table, insert_data_rows, insert_catalog_entry, query_dataset
+from nonspatialdatasets.database.database import create_catalog_table, create_dataset_table, insert_data_rows, insert_catalog_entry, query_dataset
 
 logger = logging.getLogger(__name__)
 

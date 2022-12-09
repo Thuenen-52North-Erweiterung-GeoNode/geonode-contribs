@@ -22,8 +22,6 @@ def insert_base_data():
         settings.MAPSTORE_TRANSLATIONS_PATH += ("/static/mapstore/nsd-translations",)
         settings.TEMPLATES[0]["DIRS"].insert(0, os.path.join(LOCAL_ROOT, "templates"))
 
-        title = "Non-Spatial Datasets"
-
         urlpatterns += [url(r'^nonspatial/', include('nonspatialdatasets.urls'))]
         logger.info("Non-spatial datasets contrib module loaded")
     except Exception as e:
