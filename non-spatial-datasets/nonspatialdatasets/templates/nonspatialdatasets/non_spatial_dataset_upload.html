@@ -1,10 +1,10 @@
-{% extends "nonspatialdatasets/nonspatialdatasets_base.html" %}
+{% extends "nonspatialdatasets/non_spatial_dataset_base.html" %}
 
 {% load i18n %}
 {% load bootstrap_tags %}
 
 {% block body %}
-  <form action="" class="form-horizontal" method="post">
+  <form action="" enctype="multipart/form-data" class="form-horizontal" method="post">
     <legend>{% trans "Create Non-Spatial Dataset" %}</legend>
     {% csrf_token %}
     <div class="form-controls">

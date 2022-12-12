@@ -17,49 +17,23 @@
 #
 #########################################################################
 
-import logging
-import taggit
 
 from django import forms
-from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext as _
 from .models import NonSpatialDataset
 
-logger = logging.getLogger(__name__)
 
-
-class NonSpatialDatasetCreateForm(forms.Form):
-    title = forms.CharField(
-        label=_("Title"),
-        max_length=2000,
-        widget=forms.TextInput(
-            attrs={
-                'size': '65',
-                'class': 'inputText',
-                'required': '',
-            }
-        )
-    )
-    abstract = forms.CharField(
-        label=_("Abstract"),
-        max_length=2000,
-        widget=forms.TextInput(
-            attrs={
-                'size': '65',
-                'class': 'inputText',
-                'required': '',
-            }
-        )
-    )
-    url = forms.CharField(
+class NonSpatialDatasetUploadForm(forms.Form):
+    
+    file = forms.FileField(
         label=_("Non-Spatial Dataset URL"),
         max_length=2000,
-        widget=forms.TextInput(
+        widget=forms.FileInput(
             attrs={
                 'size': '65',
                 'class': 'inputText',
                 'required': '',
-                'type': 'url',
+                'type': 'file',
 
             }
         )
@@ -67,10 +41,10 @@ class NonSpatialDatasetCreateForm(forms.Form):
         
 
 class NonSpatialDatasetForm(forms.ModelForm):
-    title = forms.CharField(
+    file = forms.FileField(
         label=_("Title"),
         max_length=2000,
-        widget=forms.TextInput(
+        widget=forms.FileInput(
             attrs={
                 'size': '65',
                 'class': 'inputText',
@@ -78,37 +52,9 @@ class NonSpatialDatasetForm(forms.ModelForm):
             }
         )
     )
-    abstract = forms.CharField(
-        label=_("Abstract"),
-        max_length=2000,
-        widget=forms.TextInput(
-            attrs={
-                'size': '65',
-                'class': 'inputText',
-                'required': '',
-            }
-        )
-    )
-    url = forms.CharField(
-        label=_("Non-Spatial Dataset URL"),
-        max_length=2000,
-        widget=forms.TextInput(
-            attrs={
-                'size': '65',
-                'class': 'inputText',
-                'required': '',
-                'type': 'url',
-
-            }
-        )
-    )
-    keywords = taggit.forms.TagField(required=False)
 
     class Meta:
         model = NonSpatialDataset
         fields = (
-            'title',
-            'abstract',
-            'url',
-            'keywords',
+            'file',
         )

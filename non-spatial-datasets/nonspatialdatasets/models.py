@@ -1,4 +1,7 @@
 from django.db import models
+from django.urls import reverse
+
+from geonode.utils import build_absolute_uri
 from geonode.layers.models import Dataset
 import logging
 
@@ -20,14 +23,18 @@ class NonSpatialDataset(Dataset):
     
     column_definitions = models.TextField('Column Definitions', blank=False)
     
-    def get_absolute_url(self):
-        return f"/nonspatial/{self.pk}"
+    def has_thumbnail(self):
+        return False
 
-    @property
-    def embed_url(self):
-        try:
-            if self.service_typename:
-                return reverse('dataset_embed', kwargs={'layername': self.service_typename})
-        except Exception as e:
-            logger.exception(e)
-            return None
+    def get_thumbnail_url(self):
+        return None
+
+    def get_detail_url(self):
+        url = f"/nonspatial/{self.pk}"
+        return build_absolute_uri(url)
+
+    def get_absolute_url(self):
+        url = f"/api/v2/nonspatialdatasets/{self.pk}"
+        return build_absolute_uri(url)
+
+    

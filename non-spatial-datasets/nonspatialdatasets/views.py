@@ -2,174 +2,106 @@ import os
 import uuid
 import json
 
-from django.http import HttpResponse, JsonResponse
-from django.views.decorators.http import require_http_methods
-from django.views.decorators.csrf import csrf_exempt
-from django.core.files.storage import FileSystemStorage
-from django.contrib.auth import get_user_model
-from django.core.exceptions import ObjectDoesNotExist
+from django.conf import settings
+from django.urls import reverse
+from django.shortcuts import render
+from django.http import HttpResponse, HttpResponseRedirect, Http404
+from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
+from django.contrib.auth.decorators import login_required
+from django.utils.translation import ugettext as _
+
+from geonode.base import register_event
+from geonode.groups.models import GroupProfile
+from geonode.monitoring.models import EventType
+from geonode.utils import mkdtemp, resolve_object
+from geonode.resource.manager import resource_manager
+from geonode.storage.manager import storage_manager
 
 from .models import NonSpatialDataset
-from .database.database import query_dataset, get_column_definitions
-from .ingestion.ingest import ingest_zipped_dataset, register_dataset
-from .coding.csv_encoder import encode_as_csv
+from .forms import NonSpatialDatasetUploadForm
+from .ingestion.ingest import ingest_zipped_dataset
 
-@require_http_methods(["GET", "POST"])
-@csrf_exempt
-def index(request):
-    if (request.method == "POST"):
-        return ingest_dataset(request)
-    else:
-        return JsonResponse({})
 
-def get_dataset_definition(request, dataset_id):
-    return JsonResponse(get_column_definitions(dataset_id=dataset_id), safe=False)
+_PERMISSION_MSG_GENERIC = _("You do not have permissions for this non-spatial dataset.")
+_PERMISSION_MSG_METADATA = _(
+    "You are not permitted to modify this non-spatial dataset's metadata")
 
-def get_dataset_data(request, dataset_id):
-    try:
-        nsd_obj = NonSpatialDataset.objects.get(id=dataset_id)
-    except ObjectDoesNotExist:
-        return JsonResponse({
-            'status_code': 404,
-            'error': 'The resource was not found'
-        })
+@login_required
+def non_spatial_dataset_upload(request):
+    template = "nonspatialdatasets/non_spatial_dataset_upload.html"
     
-    params = request.GET
-    size = extract_int_parameter(params, "size", 50)
-    start = extract_int_parameter(params, "start", 0)
-    
-    f = parse_filters(params)
-    s = parse_sorting(params)
-
-    try:
-        result = query_dataset(dataset_id=nsd_obj.internal_database_id, filters=f, start=start, size=size, sort=s, connection_string=nsd_obj.postgres_url, database_table=nsd_obj.database_table)
-    except Exception as e:
-        return JsonResponse({
-            'status_code': 500,
-            'error': 'Internal Server Error: %s' % e
-        })
-    
-    return JsonResponse(result, safe=False)
-
-def export_dataset_data(request, dataset_id):
-    try:
-        nsd_obj = NonSpatialDataset.objects.get(id=dataset_id)
-    except ObjectDoesNotExist:
-        return JsonResponse({
-            'status_code': 404,
-            'error': 'The resource was not found'
-        })
-    
-    params = request.GET
-    f = extract_string_parameter(params, "format", "csv")
-    
-    if (f not in ["json", "csv"]):
-        return JsonResponse({
-            'status_code': 400,
-            'error': f'Unsupported format: {f}'
-        })
-    
-    size = 1000
-    start = 0
-    full_data = []
-    try:
-        result = query_dataset(dataset_id=nsd_obj.internal_database_id, start=start, size=size, connection_string=nsd_obj.postgres_url, database_table=nsd_obj.database_table)
-        while(len(result) > 0):
-            full_data.extend(result)
-            start += size
-            result = query_dataset(dataset_id=nsd_obj.internal_database_id, start=start, size=size, connection_string=nsd_obj.postgres_url, database_table=nsd_obj.database_table)
+    if request.method == "POST":
         
-    except Exception as e:
-        return JsonResponse({
-            'status_code': 500,
-            'error': 'Internal Server Error: %s' % e
-        })
+        form = NonSpatialDatasetUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            if form.files and form.files["file"]:
+                file = form.files["file"]
+                tempdir = mkdtemp()
+                dirname = os.path.basename(tempdir)
+                filepath = storage_manager.save(f"{dirname}/{file.name}", file)
+                storage_path = storage_manager.path(filepath)
+                params = ingest_zipped_dataset(zip_file=storage_path)
 
+                obj = NonSpatialDataset.objects.create(owner=request.user,
+                                           column_definitions=json.dumps(
+                                               params.column_definitions),
+                                           postgres_url=params.postgres_url,
+                                           internal_database_id=params.dataset_id,
+                                           database_table=params.dataset_table,
+                                           resource_type='dataset',
+                                           subtype='nonspatial',
+                                           name=params.dataset_name,
+                                           uuid=str(uuid.uuid4()))
 
+                obj.set_missing_info()
+                resource_manager.set_permissions(None, instance=obj, permissions=None, created=True)
+            
+                # FIXME namespace
+                return HttpResponseRedirect(reverse('non_spatial_dataset_metadata_detail', args=(obj.pk,)))
 
-    if (f == "json"):
-        return JsonResponse(full_data, safe=False)
-    elif (f == "csv"):
-        return encode_csv(full_data)
-
-def encode_csv(full_data):
-    content = encode_as_csv(full_data)
-    
-    response = HttpResponse(content, content_type='text/csv')
-    response['Content-Length'] = len(content)
-
-    return response
-
-def extract_int_parameter(params, key, default_value):
-    if (key in params and len(params[key]) == 1 and params[key][0].isnumeric()):
-        return int(params[key][0])
-    return default_value
-
-def extract_string_parameter(params, key, default_value):
-    if key in params:
-        if isinstance(params[key], str):
-            return params[key]
-        else:
-            return params[key][0]
-    return default_value
-
-def parse_filters(params):
-    if ("filter" in params):
-        filters_arr = params.getlist('filter')
-        result = {}
-        for f in filters_arr:
-            kv = f.strip().split(":")
-            result[kv[0]] = kv[1]
+            raise Exception("missing 'file' in form data")
+        raise Exception("invalid form data")
+    else:
+        form = NonSpatialDatasetUploadForm()
+        result = render(request, template, {"form": form})
         return result
 
-    return None
 
-def parse_sorting(params):
-    if ("sort" in params):
-        sort = params.getlist('sort')[0].strip()
-        kv = sort.split(";")
-        asc = True
-        if (len(kv) > 1):
-            if (kv[1] == "desc"):
-                asc = False
-        result = {
-            "sort": kv[0],
-            "ascending": asc
-        }
-        
-        return result
+def _resolve_non_spatial_dataset(request, datasetid, permission='base.change_resourcebase',
+                      msg=_PERMISSION_MSG_GENERIC, **kwargs):
+    '''
+    Resolve the non-spatial dataset by the provided primary key and check the optional permission.
+    '''
+    return resolve_object(request, NonSpatialDataset, {'pk': datasetid},
+                          permission=permission, permission_msg=msg, **kwargs)
 
-    return None
+def non_spatial_dataset_metadata_detail(
+        request,
+        datasetid,
+        template='nonspatialdatasets/non_spatial_dataset_metadata_detail.html'):
+    try:
+        non_spatial_dataset = _resolve_non_spatial_dataset(
+            request,
+            datasetid,
+            'view_resourcebase',
+            _PERMISSION_MSG_METADATA)
+    except PermissionDenied:
+        return HttpResponse(_("Not allowed"), status=403)
+    except Exception:
+        raise Http404(_("Not found"))
+    if not non_spatial_dataset:
+        raise Http404(_("Not found"))
 
-def ingest_dataset(request):
-    ct = request.META.get('CONTENT_TYPE')
-
-    if (ct and ct == "application/json"):
-        if not request.body:
-            raise Exception("No POST body provided")
-        
-        tdr = json.loads(request.body)
-        params = register_dataset(tdr)
-    else:
-        payload_file = request.FILES['file']
-        fs = FileSystemStorage()
-        filename = fs.save(payload_file.name, payload_file)
-        
-        params = ingest_zipped_dataset(f"{fs.location}/{filename}")
-    
-    # TODO make the view with login_required
-    admin_name = os.getenv("ADMIN_USERNAME", "admin")
-    User = get_user_model()
-    admin_user = User.objects.get(username=admin_name)
-    
-    obj = NonSpatialDataset.objects.create(owner=admin_user,
-                column_definitions=json.dumps(params.column_definitions),
-                postgres_url=params.postgres_url,
-                internal_database_id=params.dataset_id,
-                database_table=params.dataset_table,
-                resource_type='dataset',
-                subtype='nonspatial',
-                name=params.dataset_name,
-                uuid=str(uuid.uuid4()))
-    
-    return JsonResponse({"id": obj.id})
+    group = None
+    if non_spatial_dataset.group:
+        try:
+            group = GroupProfile.objects.get(slug=non_spatial_dataset.group.name)
+        except ObjectDoesNotExist:
+            group = None
+    site_url = settings.SITEURL.rstrip('/') if settings.SITEURL.startswith('http') else settings.SITEURL
+    register_event(request, EventType.EVENT_VIEW_METADATA, non_spatial_dataset)
+    return render(request, template, context={
+        "resource": non_spatial_dataset,
+        "group": group,
+        'SITEURL': site_url
+    })
