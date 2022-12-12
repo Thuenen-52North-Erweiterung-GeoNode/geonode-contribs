@@ -44,3 +44,8 @@ To jump to the external application, either click on "View" on the resource card
 
 Editing an external application can be done only via the admin interface where all attributes can be changed. 
 To update the thumbnail you have to upload the new thumbnail by hand and change the thumbnail URL.
+
+## Removing External Application App
+
+Before removing the external application app, you have to delete all external applications from the database.
+Once, all external applications have been deleted the app can be removed by deleting it from the `INSTALLED_APPS` in the `settings.py`.
