@@ -1,5 +1,9 @@
 {% extends 'geonode-mapstore-client/_geonode_config.html' %}
 {% block override_local_config %}
+
+{% comment %} Keep the overrides from other apps {% endcomment %}
+{{ block.super }}
+
 <script>
     (function() {
         const { overrideLocalConfig } = window.__GEONODE_CONFIG__;
