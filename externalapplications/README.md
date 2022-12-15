@@ -48,4 +48,21 @@ To update the thumbnail you have to upload the new thumbnail by hand and change 
 ## Removing External Application App
 
 Before removing the external application app, you have to delete all external applications from the database.
+Open the Django shell and execute the following python tasks:
+
+```py
+python manage.py shell
+from externalapplications.models import ExternalApplication
+
+# Delete all instances from the geonode database
+for d in ExternalApplication.objects.all(): d.delete()
+```
+```
+
+After removing all instances, you can revert the mgirations via the managemant command:
+
+```sh
+python manage.py migrate externalapplications zero
+```
+
 Once, all external applications have been deleted the app can be removed by deleting it from the `INSTALLED_APPS` in the `settings.py`.
