@@ -28,8 +28,10 @@
                     filtersFormItems[0].items.push({
                         id: "externalapplication",
                         labelId: "externalapplications.filter",
-                        type: "filter",
-                        query: {
+                        type: "filter"
+                    });
+                    localConfig.geoNodeCustomFilters = Object.assign(localConfig.geoNodeCustomFilters, {
+                        "externalapplication": {
                             "filter{resource_type.in}": "externalapplication"
                         }
                     });
